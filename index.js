@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-rdfa-editor-date-overwrite-plugin'
+  name: '@lblod/ember-rdfa-editor-date-overwrite-plugin',
 };
