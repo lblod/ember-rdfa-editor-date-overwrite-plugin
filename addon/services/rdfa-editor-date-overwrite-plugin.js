@@ -1,6 +1,5 @@
-import { getOwner } from '@ember/application';
 import Service from '@ember/service';
-import EmberObject, { computed } from '@ember/object';
+import EmberObject from '@ember/object';
 import { task } from 'ember-concurrency';
 
 /**
@@ -15,7 +14,6 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
 
   init(){
     this._super(...arguments);
-    const config = getOwner(this).resolveRegistration('config:environment');
   },
 
   /**

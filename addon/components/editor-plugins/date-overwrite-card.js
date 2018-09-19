@@ -64,7 +64,7 @@ export default Component.extend({
   actions: {
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      this.get('hintsRegistry').removeHintsAtLocation(this.get('location'), this.get('hrId'), 'editor-plugins/date-overwrite-card');
+      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
       this.editor.replaceNodeWithHTML(this.domNodeToUpdate , this.createNewDomNodeHTML(this.domNodeToUpdate, this.updatedDate), true);
     }
   }
