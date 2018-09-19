@@ -1,20 +1,26 @@
-ember-rdfa-editor-date-overwrite-plugin
+@lblod/ember-rdfa-editor-date-overwrite-plugin
 ==============================================================================
 
-[Short description of the addon.]
+Easy update of date in editor-document
 
 Installation
 ------------------------------------------------------------------------------
 
 ```
-ember install ember-rdfa-editor-date-overwrite-plugin
+ember install @lblod/ember-rdfa-editor-date-overwrite-plugin
 ```
 
 
 Usage
 ------------------------------------------------------------------------------
 
-[Longer description of how to use the addon in apps.]
+Looks for the following RDFA:
+```
+<span class="annotation" property="ns:aProprty" datatype="xsd:date" content="2012-12-12">12 december 2012</span>
+```
+Once found, hint is registered. User can click in date, and this plugin will suggest to overwrite it.
+
+Providing a datepicker as help.
 
 
 Contributing
