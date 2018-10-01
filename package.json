@@ -1,6 +1,6 @@
 {
   "name": "@lblod/ember-rdfa-editor-date-overwrite-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Overwrite date by means of date picker ",
   "keywords": [
     "ember-addon"
