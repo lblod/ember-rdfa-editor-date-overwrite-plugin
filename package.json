@@ -1,13 +1,16 @@
 {
   "name": "@lblod/ember-rdfa-editor-date-overwrite-plugin",
   "version": "0.1.1",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "Overwrite date by means of date picker ",
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lblod/ember-rdfa-editor-date-overwrite-plugin.git"
+  },
   "license": "MIT",
-  "author": "",
+  "author": "redpencil.io",
   "directories": {
     "doc": "doc",
     "test": "tests"
