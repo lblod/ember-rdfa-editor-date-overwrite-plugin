@@ -13,8 +13,22 @@ import moment from 'moment';
 */
 export default Component.extend({
   layout,
+
+  isDateTime: computed('info.datatype', function(){
+    return this.get('info.datatype') == 'http://www.w3.org/2001/XMLSchema#dateTime';
+  }),
+
+  hours: computed('info.value', function(){
+    return moment(this.info.value, this.rdfaDateformat).hours();
+  }),
+
+  minutes: computed('info.value', function(){
+    return moment(this.info.value, this.rdfaDateformat).minutes();
+  }),
+
   updatedDate: '',
   dateFormat: 'DD/MM/YYYY',
+  rdfaDateFormat: 'YYYY-MM-DD',
 
   /**
    * Region on which the card applies
@@ -54,10 +68,21 @@ export default Component.extend({
     return moment(this.info.value).format('DD/MM/YYYY');
   }),
 
-  createNewDomNodeHTML(domNode, newValue){
+  createNewDomDateNodeHTML(domNode, newValue){
     let newDomNode = domNode.cloneNode(true);
     newDomNode.textContent = moment(newValue).format('LL');
-    newDomNode.setAttribute('content', moment(newValue).format('YYYY-MM-DD'));
+    newDomNode.setAttribute('content', moment(newValue).format(this.rdfaDateFormat));
+    return newDomNode.outerHTML;
+  },
+
+  createNewDomDatetimeNodeHTML(domNode, newValue, hours, minutes){
+    let newDomNode = domNode.cloneNode(true);
+    let formatValue = moment(newValue).format('LL');
+    let dateTimeIso = moment(newValue).hours(hours || 0).minutes(minutes || 0).toISOString();
+    let timeIfPresent = hours ? ` ${hours}:${minutes || '00'}` : '';
+    let value = `${formatValue} ${timeIfPresent}`;
+    newDomNode.textContent = value;
+    newDomNode.setAttribute('content', dateTimeIso);
     return newDomNode.outerHTML;
   },
 
@@ -65,7 +90,15 @@ export default Component.extend({
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
       this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-      this.editor.replaceNodeWithHTML(this.domNodeToUpdate , this.createNewDomNodeHTML(this.domNodeToUpdate, this.updatedDate), true);
+      this.editor.replaceNodeWithHTML(this.domNodeToUpdate , this.createNewDomDateNodeHTML(this.domNodeToUpdate, this.updatedDate), true);
+    },
+
+    insertDateTime(){
+      let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
+      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
+      this.editor.replaceNodeWithHTML(this.domNodeToUpdate,
+                                      this.createNewDomDatetimeNodeHTML(this.domNodeToUpdate, this.updatedDate, this.hours, this.minutes),
+                                      true);
     }
   }
 });

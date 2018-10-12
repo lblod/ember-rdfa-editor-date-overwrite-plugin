@@ -59,6 +59,9 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
     if(lastTriple.datatype == 'http://www.w3.org/2001/XMLSchema#date'){
       return true;
     }
+    if(lastTriple.datatype == 'http://www.w3.org/2001/XMLSchema#dateTime'){
+      return true;
+    }
     return false;
   },
 
@@ -82,6 +85,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
         label: `Wenst u de datum wijzigen?`,
         plainValue: hint.text,
         value: hint.value,
+        datatype: hint.datatype,
         domNode: hint.domNode,
         location: hint.location,
         hrId, hintsRegistry, editor
@@ -104,12 +108,15 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
    * @private
    */
   generateHintsForContext(context){
+    const triple = context.context.slice(-1)[0];
     const hints = [];
-    const value = context.context.slice(-1)[0].object;
+    const value = triple.object;
+    const content= triple.content;
+    const datatype = triple.datatype;
     const text = context.text;
     const location = context.region;
     const domNode = context.richNode.parent.domNode;
-    hints.push({text, location, context, value, domNode});
+    hints.push({text, location, context, value, domNode, content, datatype});
     return hints;
   }
 });
