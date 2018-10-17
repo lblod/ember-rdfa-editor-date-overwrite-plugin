@@ -82,7 +82,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
   generateCard(hrId, hintsRegistry, editor, hint){
     return EmberObject.create({
       info: {
-        label: `Wenst u de datum wijzigen?`,
+        label: `Wijzig de datum`,
         plainValue: hint.text,
         value: hint.value,
         datatype: hint.datatype,
