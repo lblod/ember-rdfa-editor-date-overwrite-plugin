@@ -68,6 +68,12 @@ export default Component.extend({
     return moment(this.info.value).format('DD/MM/YYYY');
   }),
 
+  formatTimeStr(isoStr, hours){
+    if(hours)
+      return moment(isoStr).format('LL, LT');
+    return moment(isoStr).format('LL');
+  },
+
   createNewDomDateNodeHTML(domNode, newValue){
     let newDomNode = domNode.cloneNode(true);
     newDomNode.textContent = moment(newValue).format('LL');
@@ -77,11 +83,8 @@ export default Component.extend({
 
   createNewDomDatetimeNodeHTML(domNode, newValue, hours, minutes){
     let newDomNode = domNode.cloneNode(true);
-    let formatValue = moment(newValue).format('LL');
     let dateTimeIso = moment(newValue).hours(hours || 0).minutes(minutes || 0).toISOString();
-    let timeIfPresent = hours ? ` ${hours}:${minutes || '00'}` : '';
-    let value = `${formatValue} ${timeIfPresent}`;
-    newDomNode.textContent = value;
+    newDomNode.textContent = this.formatTimeStr(dateTimeIso, hours);
     newDomNode.setAttribute('content', dateTimeIso);
     return newDomNode.outerHTML;
   },
