@@ -1,6 +1,8 @@
 import Service from '@ember/service';
 import EmberObject from '@ember/object';
 import { task } from 'ember-concurrency';
+import { isArray } from '@ember/array';
+import { warn } from '@ember/debug';
 
 /**
  * Service responsible for detecting dates and hinting invisible dates.
@@ -11,10 +13,6 @@ import { task } from 'ember-concurrency';
  * @extends EmberService
  */
 const RdfaEditorDateOverwritePlugin = Service.extend({
-
-  init(){
-    this._super(...arguments);
-  },
 
   /**
    * Restartable task to handle the incoming events from the editor dispatcher
@@ -34,7 +32,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
       .filter(this.detectRelevantContext)
       .forEach( (ctx) => {
         hintsRegistry.removeHintsInRegion(ctx.region, hrId, this.get('who'));
-        hints.pushObjects(this.generateHintsForContext(ctx));
+        hints.pushObjects(this.generateHintsForContext(editor,ctx));
       });
 
     const cards = hints.map( (hint) => this.generateCard(hrId, hintsRegistry, editor, hint));
@@ -107,7 +105,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
    *
    * @private
    */
-  generateHintsForContext(context){
+  generateHintsForContext(editor, context){
     const triple = context.context.slice(-1)[0];
     const hints = [];
     const value = triple.object;
@@ -115,9 +113,42 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
     const datatype = triple.datatype;
     const text = context.text;
     const location = context.region;
-    const domNode = context.richNode.parent.domNode;
+    const domNode = this.findDomNodeForContext(editor, context, this.firstMatchingDateDom);
     hints.push({text, location, context, value, domNode, content, datatype});
     return hints;
+  },
+
+  firstMatchingDateDom(domNode){
+    if(!domNode.attributes || !domNode.attributes.datatype)
+      return false;
+
+    let baseUri = 'http://www.w3.org/2001/XMLSchema#';
+    let expandedProperty = domNode.attributes.datatype.value.replace('xsd:', baseUri);
+
+    if('http://www.w3.org/2001/XMLSchema#date' == expandedProperty)
+      return true;
+    if('http://www.w3.org/2001/XMLSchema#dateTime' == expandedProperty)
+      return true;
+
+    return false;
+  },
+
+  ascendDomNodesUntil(rootNode, domNode, condition){
+    if(!domNode || rootNode.isEqualNode(domNode)) return null;
+    if(!condition(domNode))
+      return this.ascendDomNodesUntil(rootNode, domNode.parentElement, condition);
+    return domNode;
+  },
+
+  findDomNodeForContext(editor, context, condition){
+    let richNodes = isArray(context.richNode) ? context.richNode : [ context.richNode ];
+    let domNode = richNodes
+          .map(r => this.ascendDomNodesUntil(editor.rootNode, r.domNode, condition))
+          .find(d => d);
+    if(!domNode){
+      warn(`Trying to work on unattached domNode. Sorry can't handle these...`, {id: 'date-overwrite-plugin.domNode'});
+    }
+    return domNode;
   }
 });
 
