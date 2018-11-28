@@ -26,7 +26,9 @@ export default Component.extend({
     return moment(this.info.value, this.rdfaDateformat).minutes();
   }),
 
-  updatedDate: '',
+  updatedDate: computed('info.value', function(){
+    return moment(this.info.value, this.rdfaDateformat);
+  }),
   dateFormat: 'DD/MM/YYYY',
   rdfaDateFormat: 'YYYY-MM-DD',
 
