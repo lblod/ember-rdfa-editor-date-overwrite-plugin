@@ -1,74 +1,99 @@
-{{#if isDateTime}}
-  <p class="u-spacer--tiny">
-    {{info.label}} <br>
-    <strong>{{info.plainValue}}</strong>
-  </p>
-  {{wu-datepicker
-    placeholder=placeholder
-    class="date-range__datepicker datepicker input-field--block"
-    value=(mut updatedDate)
-    dateFormat=dateFormat
-  }}
+<div class="modal-dialog__header">
+  <div class="grid">
+    <div class="col--10-12">
+			<p class="u-spacer--tiny">
+        {{#if isDateTime}}
+			    Pas datum en tijd aan <br>
+			    huidige datum <strong>{{info.plainValue}}</strong>
+        {{else}}
+			    Wijzig de datum <br>
+			    huidige datum <strong>{{info.plainValue}}</strong>
+        {{/if}}
+			</p>
+    </div>
+    {{!--       <div class="col--2-12 u-align-right">
+            <a class="link--icon--close" href="#">
+            <span class="u-visually-hidden">Venster sluiten</span>
+            </a>
+            </div> --}}
+  </div>
+</div>
 
-    <form class="form col--12-12 col--1-1--s">
-      <div class="u-spacer--tiny">
-        met tijdstip
-        <div class="double-input js-double-input">
-          <div class="double-input__top-labels" style="margin-left:0%">
-            <div class="double-input__top-label" data-double-input-label="1">
-              uur
-            </div>
-            <div class="double-input__top-label" data-double-input-label="2">
-              minuten
-            </div>
-          </div>
-          <div class="double-input__inputs">
-            <div class="double-input__input">
-              {{input class="input-field input-field--block" placeholder="12"  data-double-input-label-highlight="1"  type="number" value=hours min=0 max=23}}
-            </div>
-            <div class="double-input__input">
-              {{input class="input-field input-field--block" placeholder="00"  data-double-input-label-highlight="2"  type="number" value=minutes min=0 max=59}}
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
+<div class="modal-dialog__content">
+  {{#if isDateTime}}
+	  <form class="form">
+		  <div class="form__row">
+			  <label>Dag</label>
+			  {{wu-datepicker
+				    placeholder=placeholder
+				    class="date-range__datepicker datepicker"
+				    value=updatedDate
+				    dateFormat=dateFormat
+			  }}
+		  </div>
 
-  {{#wu-button-group}}
-    {{#if updatedDate}}
-      {{wu-button
+		  <div class="form__row">
+		    <div class="double-input js-double-input">
+		      <div class="double-input__inputs">
+		        <div class="double-input__input">
+		          <label>
+		        	  Uur
+		            {{input
+                    class="input-field input-field--block"
+                    placeholder="12"
+                    data-double-input-label-highlight="1"
+                    type="number"
+                    value=hours
+                    min=0
+                    max=23
+                }}
+		          </label>
+		        </div>
+		        <div class="double-input__input">
+		          <label>
+		        	  Minuten
+		            {{input
+                    class="input-field input-field--block"
+                    placeholder="00"
+                    data-double-input-label-highlight="2"
+                    type="number"
+                    value=minutes
+                    min=0
+                    max=59
+                }}
+		          </label>
+		        </div>
+		      </div>
+		    </div>
+	    </div>
+	  </form>
+  {{else}}
+	  {{wu-datepicker
+	      placeholder=placeholder
+	      class="date-range__datepicker datepicker input-field--block"
+	      value=(mut updatedDate)
+	      dateFormat=dateFormat
+	  }}
+  {{/if}}
+</div>
+
+<div class="modal-dialog__footer">
+	{{#wu-button-group}}
+    {{wu-button
         label="Pas aan"
-        size="small"
         isNarrow=true
-        command="ctrl + j"
         commandLocation="below"
-        onClick=(action "insertDateTime")
-      }}
-    {{/if}}
-  {{/wu-button-group}}
-{{else}}
-  <p class="u-spacer--tiny">
-    {{info.label}} <br>
-    <strong>{{info.plainValue}}</strong>
-  </p>
-  {{wu-datepicker
-    placeholder=placeholder
-    class="date-range__datepicker datepicker input-field--block"
-    value=(mut updatedDate)
-    dateFormat=dateFormat
-  }}
-  {{#wu-button-group}}
-    {{#if updatedDate}}
-      {{wu-button
-        label="Pas aan"
-        size="small"
+        disabled=isInvalidInput
+        onClick=(action (if isDateTime "insertDateTime" "insert"))
+    }}
+    {{!--       {{wu-button
+        label="Verwerp wijzigingen"
+        class="button--alt"
         isNarrow=true
-        command="ctrl + j"
         commandLocation="below"
-        onClick=(action "insert")
-      }}
-    {{/if}}
-  {{/wu-button-group}}
-{{/if}}
+        onClick=null
+        }} --}}
+	{{/wu-button-group}}
+</div>
 
 {{yield}}

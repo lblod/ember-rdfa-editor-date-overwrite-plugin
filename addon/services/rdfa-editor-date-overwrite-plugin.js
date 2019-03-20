@@ -80,7 +80,6 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
   generateCard(hrId, hintsRegistry, editor, hint){
     return EmberObject.create({
       info: {
-        label: `Wijzig de datum`,
         plainValue: hint.text,
         value: hint.value,
         datatype: hint.datatype,

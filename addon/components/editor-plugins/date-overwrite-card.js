@@ -1,5 +1,5 @@
 import { computed } from '@ember/object';
-import { reads } from '@ember/object/computed';
+import { reads, not } from '@ember/object/computed';
 import Component from '@ember/component';
 import layout from '../../templates/components/editor-plugins/date-overwrite-card';
 import moment from 'moment';
@@ -18,17 +18,28 @@ export default Component.extend({
     return this.get('info.datatype') == 'http://www.w3.org/2001/XMLSchema#dateTime';
   }),
 
-  hours: computed('info.value', function(){
-    return moment(this.info.value, this.rdfaDateformat).hours();
+  isValidValue: computed('info.value', function() {
+    return moment(this.info.value).isValid();
   }),
 
-  minutes: computed('info.value', function(){
-    return moment(this.info.value, this.rdfaDateformat).minutes();
+  isValidInput: computed('updatedDate', 'minutes', 'hours', function() {
+    return moment(this.updatedDate).isValid() && (!this.isDateTime || (this.minutes && this.hours));
   }),
 
-  updatedDate: computed('info.value', function(){
-    return moment(this.info.value, this.rdfaDateformat);
+  isInvalidInput: not('isValidInput'),
+
+  hours: computed('isValidValue', 'info.value', function(){
+    return this.isValidValue ? `${moment(this.info.value, this.rdfaDateformat).hours()}` : null;
   }),
+
+  minutes: computed('isValidValue', 'info.value', function(){
+    return this.isValidValue ? `${moment(this.info.value, this.rdfaDateformat).minutes()}` : null;
+  }),
+
+  updatedDate: computed('isValidValue', 'info.value', function(){
+    return this.isValidValue ? moment(this.info.value, this.rdfaDateformat) : null;
+  }),
+
   dateFormat: 'DD/MM/YYYY',
   rdfaDateFormat: 'YYYY-MM-DD',
 
@@ -67,7 +78,7 @@ export default Component.extend({
   domNodeToUpdate: reads('info.domNode'),
 
   placeholder: computed('info.value', function(){
-    return moment(this.info.value).format('DD/MM/YYYY');
+    return moment(new Date()).format('DD/MM/YYYY');
   }),
 
   formatTimeStr(isoStr, hours){
