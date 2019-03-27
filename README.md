@@ -24,7 +24,7 @@ Usage
 
 Looks for the following RDFA:
 ```
-<span class="annotation" property="ns:aProprty" datatype="xsd:date" content="2012-12-12">12 december 2012</span>
+<span property="ns:aProprty" datatype="xsd:date" content="2012-12-12">12 december 2012</span>
 ```
 Once found, hint is registered. User can click in date, and this plugin will suggest to overwrite it.
 
