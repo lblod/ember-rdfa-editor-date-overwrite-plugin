@@ -5,8 +5,29 @@ import { isArray } from '@ember/array';
 import { warn } from '@ember/debug';
 
 /**
- * Service responsible for detecting dates and hinting invisible dates.
+ * Service responsible to check for RDFA date types and adding a hint to modify it when found.
  *
+ * ---------------------------------------------------
+ * CODE REVIEW NOTES
+ * ---------------------------------------------------
+ *
+ *  INTERACTION PATTERNS
+ *  --------------------
+ *  For all incoming contexts, first look whether there is an rdfa node with dataType=xsd:date or xsd:datetime.
+ *  If encountered, a hint is generated at the textual location of the content of that node.
+ *  At hint insertion, the hinted node is replaced with update content.
+ *
+ *  POTENTIAL ISSUES/TODO
+ *  ---------------------
+ *  - Current implementation passes the domNode to replace to the card. At insetion of the update hint, this might be problematic
+ *      as this dom node can be removed from the tree. (e.g. in case a silent DOM update occurs like setting a highlight)
+ *
+ *     TODO: Robust update of domNode
+ *
+ *
+ * ---------------------------------------------------
+ * END CODE REVIEW NOTES
+ * ---------------------------------------------------
  * @module editor-date-overwrite-plugin
  * @class RdfaEditorDateOverwritePlugin
  * @constructor
