@@ -104,7 +104,6 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
         plainValue: hint.text,
         value: hint.value,
         datatype: hint.datatype,
-        domNode: hint.domNode,
         location: hint.location,
         hrId, hintsRegistry, editor
       },
@@ -133,24 +132,8 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
     const datatype = triple.datatype;
     const text = context.text;
     const location = context.region;
-    const domNode = this.findDomNodeForContext(editor, context, this.firstMatchingDateDom);
-    hints.push({text, location, context, value, domNode, content, datatype});
+    hints.push({text, location, context, value, content, datatype});
     return hints;
-  },
-
-  firstMatchingDateDom(domNode){
-    if(!domNode.attributes || !domNode.attributes.datatype)
-      return false;
-
-    let baseUri = 'http://www.w3.org/2001/XMLSchema#';
-    let expandedProperty = domNode.attributes.datatype.value.replace('xsd:', baseUri);
-
-    if('http://www.w3.org/2001/XMLSchema#date' == expandedProperty)
-      return true;
-    if('http://www.w3.org/2001/XMLSchema#dateTime' == expandedProperty)
-      return true;
-
-    return false;
   },
 
   ascendDomNodesUntil(rootNode, domNode, condition){

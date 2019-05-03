@@ -75,8 +75,6 @@ export default Component.extend({
   */
   hintsRegistry: reads('info.hintsRegistry'),
 
-  domNodeToUpdate: reads('info.domNode'),
-
   placeholder: computed('info.value', function(){
     return moment(new Date()).format('DD/MM/YYYY');
   }),
@@ -94,6 +92,23 @@ export default Component.extend({
     return newDomNode.outerHTML;
   },
 
+
+  firstMatchingDateNode(region){
+    const contexts = this.editor.getContexts({ region });
+    const baseUri = 'http://www.w3.org/2001/XMLSchema#';
+    const context = contexts.find(( snippet) =>  {
+      const types = [
+        'http://www.w3.org/2001/XMLSchema#date',
+        'http://www.w3.org/2001/XMLSchema#dateTime'
+      ];
+      const node = snippet.semanticNode;
+      return node.rdfaAttributes.datatype && types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
+    });
+    if (context) {
+      return context.semanticNode;
+    }
+  },
+
   createNewDomDatetimeNodeHTML(domNode, newValue, hours, minutes){
     let newDomNode = domNode.cloneNode(true);
     let dateTimeIso = moment(newValue).hours(hours || 0).minutes(minutes || 0).toISOString();
@@ -106,15 +121,23 @@ export default Component.extend({
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
       this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-      this.editor.replaceNodeWithHTML(this.domNodeToUpdate , this.createNewDomDateNodeHTML(this.domNodeToUpdate, this.updatedDate), true);
+      const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
+      if (nodeToUpdate) {
+        const domNodeToUpdate = nodeToUpdate.domNode;
+        this.editor.replaceNodeWithHTML(domNodeToUpdate , this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate), true);
+      }
     },
 
     insertDateTime(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
       this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-      this.editor.replaceNodeWithHTML(this.domNodeToUpdate,
-                                      this.createNewDomDatetimeNodeHTML(this.domNodeToUpdate, this.updatedDate, this.hours, this.minutes),
-                                      true);
+      const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
+      if (nodeToUpdate) {
+        const domNodeToUpdate = nodeToUpdate.domNode;
+        this.editor.replaceNodeWithHTML(domNodeToUpdate,
+                                        this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes),
+                                        true);
+      }
     }
   }
 });
