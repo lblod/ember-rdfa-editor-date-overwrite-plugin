@@ -120,23 +120,20 @@ export default Component.extend({
   actions: {
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-      const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
-      if (nodeToUpdate) {
-        const domNodeToUpdate = nodeToUpdate.domNode;
-        this.editor.replaceNodeWithHTML(domNodeToUpdate , this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate), true);
-      }
-    },
-
-    insertDateTime(){
-      let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-      const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
-      if (nodeToUpdate) {
-        const domNodeToUpdate = nodeToUpdate.domNode;
-        this.editor.replaceNodeWithHTML(domNodeToUpdate,
-                                        this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes),
-                                        true);
+      if (this.updatedDate !== this.info.value) {
+        this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
+        const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
+        if (nodeToUpdate) {
+          const domNodeToUpdate = nodeToUpdate.domNode;
+          var newValue;
+          if (this.isDateTime) {
+            newValue = this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes);
+          }
+          else {
+            newValue = this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate);
+          }
+          this.editor.replaceNodeWithHTML(domNodeToUpdate, newValue, true);
+        }
       }
     }
   }
