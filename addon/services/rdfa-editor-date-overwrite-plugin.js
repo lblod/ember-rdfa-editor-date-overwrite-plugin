@@ -130,7 +130,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
     const value = triple.object;
     const content= triple.content;
     const datatype = triple.datatype;
-    const text = context.text;
+    const text = context.text || '';
     const location = context.region;
     hints.push({text, location, context, value, content, datatype});
     return hints;
@@ -144,7 +144,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
   },
 
   findDomNodeForContext(editor, context, condition){
-    let richNodes = isArray(context.richNode) ? context.richNode : [ context.richNode ];
+    let richNodes = context.richNodes;
     let domNode = richNodes
           .map(r => this.ascendDomNodesUntil(editor.rootNode, r.domNode, condition))
           .find(d => d);
