@@ -120,7 +120,7 @@ export default Component.extend({
   actions: {
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      if (this.updatedDate !== this.info.value) {
+      if (this.updatedDate.toISOString() !== this.info.value) {
         this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
         const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
         if (nodeToUpdate) {
