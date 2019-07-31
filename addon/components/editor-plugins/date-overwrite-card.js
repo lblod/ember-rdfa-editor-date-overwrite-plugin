@@ -35,7 +35,7 @@ export default Component.extend({
       return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).hours()}` : null;
     },
     set(k,v){
-      this.set('_date', moment(this._date).hour(v).toISOString());
+      if(v) this.set('_date', moment(this._date).hour(v).toISOString());
       return v;
     }
   }),
@@ -45,7 +45,7 @@ export default Component.extend({
       return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).minutes()}` : null;
     },
     set(k,v){
-      this.set('_date', moment(this._date).minutes(v).toISOString());
+      if(v) this.set('_date', moment(this._date).minutes(v).toISOString());
       return v;
     }
   }),
@@ -56,10 +56,10 @@ export default Component.extend({
     },
     set(k, v){
       if(moment(v).isValid()){
-        this.set('_date', moment(v).hours(this.hours).minutes(this.minutes).toISOString());
+        this.set('_date', moment(v).hours(this.hours || 0 ).minutes(this.minutes || 0).toISOString());
         return moment(this._date, this.rdfaDateformat);
       }
-      return null;
+      return v;
     }
   }),
 
