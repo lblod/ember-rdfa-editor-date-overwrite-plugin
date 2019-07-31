@@ -14,12 +14,14 @@ import moment from 'moment';
 export default Component.extend({
   layout,
 
+  _date: null,
+
   isDateTime: computed('info.datatype', function(){
     return this.get('info.datatype') == 'http://www.w3.org/2001/XMLSchema#dateTime';
   }),
 
-  isValidValue: computed('info.value', function() {
-    return moment(this.info.value).isValid();
+  isValidValue: computed('_date', function() {
+    return moment(this._date).isValid();
   }),
 
   isValidInput: computed('updatedDate', 'minutes', 'hours', function() {
@@ -28,17 +30,44 @@ export default Component.extend({
 
   isInvalidInput: not('isValidInput'),
 
-  hours: computed('isValidValue', 'info.value', function(){
-    return this.isValidValue ? `${moment(this.info.value, this.rdfaDateformat).hours()}` : null;
+  hours: computed('isValidValue', '_date', {
+    get(){
+      return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).hours()}` : null;
+    },
+    set(k,v){
+      this.set('_date', moment(this._date).hour(v).toISOString());
+      return v;
+    }
   }),
 
-  minutes: computed('isValidValue', 'info.value', function(){
-    return this.isValidValue ? `${moment(this.info.value, this.rdfaDateformat).minutes()}` : null;
+  minutes: computed('isValidValue', '_date', {
+     get(){
+      return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).minutes()}` : null;
+    },
+    set(k,v){
+      this.set('_date', moment(this._date).minutes(v).toISOString());
+      return v;
+    }
   }),
 
-  updatedDate: computed('isValidValue', 'info.value', function(){
-    return this.isValidValue ? moment(this.info.value, this.rdfaDateformat) : null;
+  updatedDate: computed('isValidValue', '_date', {
+    get(){
+      return this.isValidValue ? moment(this._date, this.rdfaDateformat) : null;
+    },
+    set(k, v){
+      if(moment(v).isValid()){
+        this.set('_date', moment(v).hours(this.hours).minutes(this.minutes).toISOString());
+        return moment(this._date, this.rdfaDateformat);
+      }
+      return null;
+    }
   }),
+
+   didReceiveAttrs() {
+     this._super(...arguments);
+     if(moment(this.info.value).isValid())
+       this.set('_date', this.info.value);
+   },
 
   dateFormat: 'DD/MM/YYYY',
   rdfaDateFormat: 'YYYY-MM-DD',
