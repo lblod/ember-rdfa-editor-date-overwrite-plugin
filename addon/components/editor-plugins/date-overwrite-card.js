@@ -1,8 +1,9 @@
 import { computed } from '@ember/object';
-import { reads, not } from '@ember/object/computed';
+import { reads, not, alias } from '@ember/object/computed';
 import Component from '@ember/component';
 import layout from '../../templates/components/editor-plugins/date-overwrite-card';
 import moment from 'moment';
+import { inject as service} from '@ember/service';
 
 /**
 * Card displaying a hint of the Date plugin
@@ -13,6 +14,14 @@ import moment from 'moment';
 */
 export default Component.extend({
   layout,
+  store: service(),
+  rdfsPropertyObject: computed("info.rdfaProperty", function() {
+  	if(this.get("info.rdfaProperty")) {
+  		return this.store.peekAll('rdfs-property').filterBy('rdfaType', this.info.rdfaProperty).firstObject
+  	} // TODO: only works if property was fetched beforehand.
+  }),
+
+  propertyLabel: alias("rdfsPropertyObject.label"),
 
   _date: null,
 
@@ -50,17 +59,8 @@ export default Component.extend({
     }
   }),
 
-  updatedDate: computed('isValidValue', '_date', {
-    get(){
-      return this.isValidValue ? moment(this._date, this.rdfaDateformat) : null;
-    },
-    set(k, v){
-      if(moment(v).isValid()){
-        this.set('_date', moment(v).hours(this.hours || 0 ).minutes(this.minutes || 0).toISOString());
-        return moment(this._date, this.rdfaDateformat);
-      }
-      return v;
-    }
+  updatedDate: computed('isValidValue', '_date', function () {
+    return this.isValidValue ? moment(this._date, this.rdfaDateformat) : null;
   }),
 
    didReceiveAttrs() {
@@ -131,7 +131,9 @@ export default Component.extend({
         'http://www.w3.org/2001/XMLSchema#dateTime'
       ];
       const node = snippet.semanticNode;
-      return node.rdfaAttributes.datatype && types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
+      return node.rdfaAttributes
+      	&& node.rdfaAttributes.datatype
+      	&& types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
     });
     if (context) {
       return context.semanticNode;
@@ -147,6 +149,14 @@ export default Component.extend({
   },
 
   actions: {
+  	updateDate(v){
+      console.log("updateddate");
+      if(moment(v).isValid()){
+        this.set('_date', moment(v).hours(this.hours || 0 ).minutes(this.minutes || 0).toISOString());
+        return moment(this._date, this.rdfaDateformat);
+      }
+    },
+
     insert(){
       let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
       if (this.updatedDate.toISOString() !== this.info.value) {

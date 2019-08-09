@@ -1,99 +1,45 @@
-<div class="modal-dialog__header">
-  <div class="grid">
-    <div class="col--10-12">
-      <p class="u-spacer--tiny">
-        {{#if isDateTime}}
-          Pas datum en tijd aan <br>
-          huidige datum <strong>{{info.plainValue}}</strong>
-        {{else}}
-          Wijzig de datum <br>
-          huidige datum <strong>{{info.plainValue}}</strong>
-        {{/if}}
-      </p>
-    </div>
-    {{!--       <div class="col--2-12 u-align-right">
-            <a class="link--icon--close" href="#">
-            <span class="u-visually-hidden">Venster sluiten</span>
-            </a>
-            </div> --}}
-  </div>
-</div>
+<Say::Hint @type="sectioned" @size="small" as |hint|>
 
-<div class="modal-dialog__content">
-  {{#if isDateTime}}
-    <form class="form">
-      <div class="form__row">
-        <label>Dag</label>
-        {{wu-datepicker
-            placeholder=placeholder
-            class="date-range__datepicker datepicker"
-            value=updatedDate
-            dateFormat=dateFormat
-        }}
-      </div>
+  <hint.header>
+    {{#if this.isDateTime}}
+      Pas datum en tijd aan
+      {{#if this.propertyLabel}}
+      	van <strong>{{this.propertyLabel}}</strong>
+      {{/if}}. <br>
+      huidige datum <strong>{{info.plainValue}}</strong>
+    {{else}}
+      Wijzig de datum
+      {{#if this.propertyLabel}}
+      	van <strong>{{this.propertyLabel}}</strong>
+      {{/if}}. <br>
+      huidige datum <strong>{{this.info.plainValue}}</strong>
+    {{/if}}
+  </hint.header>
 
-      <div class="form__row">
-        <div class="double-input js-double-input">
-          <div class="double-input__inputs">
-            <div class="double-input__input">
-              <label>
-                Uur
-                {{input
-                    class="input-field input-field--block"
-                    placeholder="19"
-                    data-double-input-label-highlight="1"
-                    type="number"
-                    value=hours
-                    min=0
-                    max=23
-                }}
-              </label>
-            </div>
-            <div class="double-input__input">
-              <label>
-                Minuten
-                {{input
-                    class="input-field input-field--block"
-                    placeholder="00"
-                    data-double-input-label-highlight="2"
-                    type="number"
-                    value=minutes
-                    min=0
-                    max=59
-                }}
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-  {{else}}
-    {{wu-datepicker
-        placeholder=placeholder
-        class="date-range__datepicker datepicker input-field--block"
-        value=(mut updatedDate)
-        dateFormat=dateFormat
-    }}
-  {{/if}}
-</div>
+  <hint.content @padded="small" as |content|>
+	  {{#if this.isDateTime}}
+	    <form class="form">
+	      <content.date @value={{this.updatedDate}} @onChange={{action "updateDate"}} @dateFormat={{this.dateFormat}} />
+	      {{!-- <content.time @hours={{this.hours}} @minutes={{this.minutes}} /> --}}
+	    </form>
+	  {{else}}
+	    {{wu-datepicker
+	        placeholder=placeholder
+	        class="date-range__datepicker datepicker input-field--block"
+	        value=(mut updatedDate)
+	        dateFormat=dateFormat
+	    }}
 
-<div class="modal-dialog__footer">
-  {{#wu-button-group}}
-    {{wu-button
-        label="Pas aan"
-        isNarrow=true
-        commandLocation="below"
-        disabled=isInvalidInput
-        onClick=(action "insert")
-    }}
-    {{!--       {{wu-button
-        label="Verwerp wijzigingen"
-        class="button--alt"
-        isNarrow=true
-        commandLocation="below"
-        onClick=null
-        }} --}}
-  {{/wu-button-group}}
-</div>
+	    {{!-- <content.date @updatedDate={{this.updatedDate}} @dateFormat={{this.dateFormat}} /> --}}
+	  {{/if}}
+	</hint.content>
+
+	<hint.footer>
+	  <Say::ActionGroup>
+		  <Say::Button @width="narrow" @disabled={{this.isInvalidInput}} @onClick={{action "insert"}}>Pas aan</Say::Button>
+		  {{!-- <Say::Button @width="narrow" @style="alt" @onClick=null>Verwerp wijzigingen</Say::Button> --}}
+		</Say::ActionGroup>
+	</hint.footer>
+</Say::Hint>
 
 {{yield}}

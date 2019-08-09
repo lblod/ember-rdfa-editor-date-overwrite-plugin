@@ -101,6 +101,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
   generateCard(hrId, hintsRegistry, editor, hint){
     return EmberObject.create({
       info: {
+      	rdfaProperty: hint.context.context.lastObject.predicate,
         plainValue: hint.text,
         value: hint.value,
         datatype: hint.datatype,
