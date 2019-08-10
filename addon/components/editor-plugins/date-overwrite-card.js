@@ -1,3 +1,4 @@
+import { action } from '@ember/object';
 import { computed } from '@ember/object';
 import { reads, not, alias } from '@ember/object/computed';
 import Component from '@ember/component';
@@ -12,65 +13,73 @@ import { inject as service} from '@ember/service';
 * @class DateOverwriteCard
 * @extends Ember.Component
 */
-export default Component.extend({
-  layout,
-  store: service(),
-  rdfsPropertyObject: computed("info.rdfaProperty", function() {
+export default class EditorPluginDateOverWriteCardComponent extends Component {
+  layout = layout
+
+  @service store
+
+  @computed("info.rdfaProperty")
+  get rdfsPropertyObject() {
   	if(this.get("info.rdfaProperty")) {
-  		return this.store.peekAll('rdfs-property').filterBy('rdfaType', this.info.rdfaProperty).firstObject
+  		return this.store.peekAll('rdfs-property').filterBy('rdfaType', this.info.rdfaProperty).firstObject;
   	} // TODO: only works if property was fetched beforehand.
-  }),
+  }
 
-  propertyLabel: alias("rdfsPropertyObject.label"),
+  @alias( "rdfsPropertyObject.label" ) propertyLabel
 
-  _date: null,
+  _date = null
 
-  isDateTime: computed('info.datatype', function(){
+  dateFormat = 'DD/MM/YYYY'
+  rdfaDateFormat = 'YYYY-MM-DD'
+
+
+  @computed('info.datatype')
+  get isDateTime(){
     return this.get('info.datatype') == 'http://www.w3.org/2001/XMLSchema#dateTime';
-  }),
+  }
 
-  isValidValue: computed('_date', function() {
+  @computed( '_date' )
+  get isValidValue() {
     return moment(this._date).isValid();
-  }),
+  }
 
-  isValidInput: computed('updatedDate', 'minutes', 'hours', function() {
+  @computed('updatedDate', 'minutes', 'hours')
+  get isValidInput() {
     return moment(this.updatedDate).isValid() && (!this.isDateTime || (this.minutes && this.hours));
-  }),
+  }
 
-  isInvalidInput: not('isValidInput'),
+  @not('isValidInput') isInvalidInput
 
-  hours: computed('isValidValue', '_date', {
-    get(){
-      return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).hours()}` : null;
-    },
-    set(k,v){
-      if(v) this.set('_date', moment(this._date).hour(v).toISOString());
-      return v;
-    }
-  }),
+  @computed('isValidValue', '_date')
+  get hours() {
+    return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).hours()}` : null;
+  }
 
-  minutes: computed('isValidValue', '_date', {
-     get(){
-      return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).minutes()}` : null;
-    },
-    set(k,v){
-      if(v) this.set('_date', moment(this._date).minutes(v).toISOString());
-      return v;
-    }
-  }),
+  @action
+  setHours(h) {
+    if(h) this.set('_date', moment(this._date).hour(h).toISOString());
+  }
 
-  updatedDate: computed('isValidValue', '_date', function () {
+  @computed('isValidValue', '_date')
+  get minutes(){
+    return this.isValidValue ? `${moment(this._date, this.rdfaDateformat).minutes()}` : null;
+  }
+
+  @action
+  setMinutes(m) {
+    if(m) this.set('_date', moment(this._date).minutes(m).toISOString());
+  }
+
+  @computed('isValidValue', '_date')
+  get updatedDate() {
     return this.isValidValue ? moment(this._date, this.rdfaDateformat) : null;
-  }),
+  }
 
-   didReceiveAttrs() {
-     this._super(...arguments);
-     if(moment(this.info.value).isValid())
-       this.set('_date', this.info.value);
-   },
-
-  dateFormat: 'DD/MM/YYYY',
-  rdfaDateFormat: 'YYYY-MM-DD',
+  didReceiveAttrs() {
+    this._super(...arguments);
+    if(moment(this.info.value).isValid())
+      this.set('_date', this.info.value);
+  }
 
   /**
    * Region on which the card applies
@@ -78,7 +87,7 @@ export default Component.extend({
    * @type [number,number]
    * @private
   */
-  location: reads('info.location'),
+  @reads('info.location') location
 
   /**
    * Unique identifier of the event in the hints registry
@@ -86,7 +95,7 @@ export default Component.extend({
    * @type Object
    * @private
   */
-  hrId: reads('info.hrId'),
+  @reads('info.hrId') hrId
 
   /**
    * The RDFa editor instance
@@ -94,7 +103,7 @@ export default Component.extend({
    * @type RdfaEditor
    * @private
   */
-  editor: reads('info.editor'),
+  @reads('info.editor') editor
 
   /**
    * Hints registry storing the cards
@@ -102,25 +111,25 @@ export default Component.extend({
    * @type HintsRegistry
    * @private
   */
-  hintsRegistry: reads('info.hintsRegistry'),
+  @reads('info.hintsRegistry') hintsRegistry
 
-  placeholder: computed('info.value', function(){
+  @computed('info.value')
+  get placeholder(){
     return moment(new Date()).format('DD/MM/YYYY');
-  }),
+  }
 
   formatTimeStr(isoStr, hours){
     if(hours)
       return moment(isoStr).format('LL, LT');
     return moment(isoStr).format('LL');
-  },
+  }
 
   createNewDomDateNodeHTML(domNode, newValue){
     let newDomNode = domNode.cloneNode(true);
     newDomNode.textContent = moment(newValue).format('LL');
     newDomNode.setAttribute('content', moment(newValue).format(this.rdfaDateFormat));
     return newDomNode.outerHTML;
-  },
-
+  }
 
   firstMatchingDateNode(region){
     const contexts = this.editor.getContexts({ region });
@@ -138,7 +147,7 @@ export default Component.extend({
     if (context) {
       return context.semanticNode;
     }
-  },
+  }
 
   createNewDomDatetimeNodeHTML(domNode, newValue, hours, minutes){
     let newDomNode = domNode.cloneNode(true);
@@ -146,34 +155,39 @@ export default Component.extend({
     newDomNode.textContent = this.formatTimeStr(dateTimeIso, hours);
     newDomNode.setAttribute('content', dateTimeIso);
     return newDomNode.outerHTML;
-  },
+  }
 
-  actions: {
-  	updateDate(v){
-      console.log("updateddate");
-      if(moment(v).isValid()){
-        this.set('_date', moment(v).hours(this.hours || 0 ).minutes(this.minutes || 0).toISOString());
-        return moment(this._date, this.rdfaDateformat);
-      }
-    },
+  @action
+  updateDate(v){
+    console.log("updateddate");
+    if(moment(v).isValid()){
+      this.set('_date', moment(v).hours(this.hours || 0 ).minutes(this.minutes || 0).toISOString());
+      return moment(this._date, this.rdfaDateformat);
+    }
+  }
 
-    insert(){
-      let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      if (this.updatedDate.toISOString() !== this.info.value) {
-        this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
-        const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
-        if (nodeToUpdate) {
-          const domNodeToUpdate = nodeToUpdate.domNode;
-          var newValue;
-          if (this.isDateTime) {
-            newValue = this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes);
-          }
-          else {
-            newValue = this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate);
-          }
-          this.editor.replaceNodeWithHTML(domNodeToUpdate, newValue, true);
+  @action
+  insert(){
+    if( !this.isValidInput )
+      return;
+    
+    let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
+    if (this.updatedDate.toISOString() !== this.info.value) {
+      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
+      const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
+      if (nodeToUpdate) {
+        const domNodeToUpdate = nodeToUpdate.domNode;
+        var newValue;
+        if (this.isDateTime) {
+          newValue = this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes);
         }
+        else {
+          newValue = this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate);
+        }
+        this.editor.replaceNodeWithHTML(domNodeToUpdate, newValue, true);
       }
     }
   }
-});
+    
+}
+
