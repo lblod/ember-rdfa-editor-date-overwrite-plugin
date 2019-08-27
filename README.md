@@ -32,6 +32,8 @@ Once found, hint is registered. User can click in date, and this plugin will sug
 
 Provides a datepicker as help.
 
+Recommended to use this plugin in conjunction with [ember-rdfa-editor-date-plugin](https://github.com/lblod/ember-rdfa-editor-date-plugin) to allow insertion of new dates.
+
 
 Contributing
 ------------------------------------------------------------------------------
