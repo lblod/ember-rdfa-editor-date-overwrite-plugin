@@ -2,27 +2,23 @@
 
   <hint.header>
     {{#if this.isDateTime}}
-      Pas datum en tijd aan
-      {{#if this.propertyLabel}}
-        van <strong>{{this.propertyLabel}}</strong>
-      {{/if}}. <br>
-      huidige datum <strong>{{info.plainValue}}</strong>
+      Pas datum en tijd aan{{#if this.propertyLabel}} van <strong>{{this.propertyLabel}}</strong>{{/if}}. <br>
+      {{!-- Huidige datum <strong>{{info.plainValue}}</strong>. --}}
     {{else}}
-      Wijzig de datum
-      {{#if this.propertyLabel}}
-        van <strong>{{this.propertyLabel}}</strong>
-      {{/if}}. <br>
-      huidige datum <strong>{{this.info.plainValue}}</strong>
+      Wijzig de datum{{#if this.propertyLabel}} van <strong>{{this.propertyLabel}}</strong>{{/if}}. <br>
+      {{!-- Huidige datum <strong>{{this.info.plainValue}}</strong>. --}}
     {{/if}}
   </hint.header>
 
   <hint.content @padded="small" as |content|>
     <content.form @onSubmit={{action "insert"}} as |form|>
-      <form.date
-        @value={{this.updatedDate}}
-        @onChange={{action "updateDate"}}
-        @dateFormat={{this.dateFormat}}
-      />
+    	<div class="u-spacer--bottom--small">
+	      <form.date
+	        @value={{this.updatedDate}}
+	        @onChange={{action "updateDate"}}
+	        @dateFormat={{this.dateFormat}}
+	      />
+	    </div>
       {{#if this.isDateTime}}
         <form.time
           @hours={{this.hours}}
