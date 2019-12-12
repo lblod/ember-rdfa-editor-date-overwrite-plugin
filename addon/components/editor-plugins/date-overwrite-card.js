@@ -131,7 +131,7 @@ export default Component.extend({
         'http://www.w3.org/2001/XMLSchema#dateTime'
       ];
       const node = snippet.semanticNode;
-      return node.rdfaAttributes.datatype && types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
+      return node.rdfaAttributes && node.rdfaAttributes.datatype && types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
     });
     if (context) {
       return context.semanticNode;
