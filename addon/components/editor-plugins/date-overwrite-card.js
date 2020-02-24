@@ -114,36 +114,38 @@ export default Component.extend({
     return moment(isoStr).format('LL');
   },
 
-  createNewDomDateNodeHTML(domNode, newValue){
-    let newDomNode = domNode.cloneNode(true);
-    newDomNode.textContent = moment(newValue).format('LL');
-    newDomNode.setAttribute('content', moment(newValue).format(this.rdfaDateFormat));
-    return newDomNode.outerHTML;
+  createNewDateContent(newValue){
+    const newContent = {
+      text: moment(newValue).format('LL'),
+      content:  moment(newValue).format(this.rdfaDateFormat)
+    }
+    return newContent;
   },
 
 
   firstMatchingDateNode(region){
-    const contexts = this.editor.getContexts({ region });
-    const baseUri = 'http://www.w3.org/2001/XMLSchema#';
-    const context = contexts.find(( snippet) =>  {
-      const types = [
-        'http://www.w3.org/2001/XMLSchema#date',
-        'http://www.w3.org/2001/XMLSchema#dateTime'
-      ];
-      const node = snippet.semanticNode;
-      return node.rdfaAttributes && node.rdfaAttributes.datatype && types.includes(node.rdfaAttributes.datatype.replace('xsd:', baseUri));
-    });
-    if (context) {
-      return context.semanticNode;
+    const dateNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#date'})
+    const dateTimeNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#dateTime'})
+    if(dateNodes.selections.length && dateTimeNodes.selections.length) {
+      if(dateNodes.selections[0].range[0] < dateTimeNodes.selections[0].range[0]) {
+        return dateNodes
+      } else {
+        return dateTimeNodes
+      }
+    } else if(dateNodes.selections.length) {
+      return dateNodes
+    } else {
+      return dateTimeNodes
     }
   },
 
-  createNewDomDatetimeNodeHTML(domNode, newValue, hours, minutes){
-    let newDomNode = domNode.cloneNode(true);
+  createNewDatetimeContent(newValue, hours, minutes){
     let dateTimeIso = moment(newValue).hours(hours || 0).minutes(minutes || 0).toISOString();
-    newDomNode.textContent = this.formatTimeStr(dateTimeIso, hours);
-    newDomNode.setAttribute('content', dateTimeIso);
-    return newDomNode.outerHTML;
+    const newContent = {
+      text: this.formatTimeStr(dateTimeIso, hours),
+      content: dateTimeIso
+    }
+    return newContent
   },
 
   actions: {
@@ -153,15 +155,17 @@ export default Component.extend({
         this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/date-overwrite-card');
         const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
         if (nodeToUpdate) {
-          const domNodeToUpdate = nodeToUpdate.domNode;
-          var newValue;
+          const domNodeToUpdate = nodeToUpdate;
+          console.log(domNodeToUpdate)
+          var newContent;
           if (this.isDateTime) {
-            newValue = this.createNewDomDatetimeNodeHTML(domNodeToUpdate, this.updatedDate, this.hours, this.minutes);
+            newContent = this.createNewDatetimeContent(this.updatedDate, this.hours, this.minutes);
           }
           else {
-            newValue = this.createNewDomDateNodeHTML(domNodeToUpdate, this.updatedDate);
+            newContent = this.createNewDateContent(domNodeToUpdate, this.updatedDate);
           }
-          this.editor.replaceNodeWithHTML(domNodeToUpdate, newValue, true);
+          console.log(newContent)
+          this.editor.update(nodeToUpdate, {set: { innerHTML: newContent.text, content: newContent.content }})
         }
       }
     }
