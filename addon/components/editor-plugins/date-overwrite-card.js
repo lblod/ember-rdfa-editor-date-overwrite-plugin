@@ -126,13 +126,7 @@ export default Component.extend({
   firstMatchingDateNode(region){
     const dateNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#date'})
     const dateTimeNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#dateTime'})
-    if(dateNodes.selections.length && dateTimeNodes.selections.length) {
-      if(dateNodes.selections[0].range[0] < dateTimeNodes.selections[0].range[0]) {
-        return dateNodes
-      } else {
-        return dateTimeNodes
-      }
-    } else if(dateNodes.selections.length) {
+    if(dateNodes.selections.length) {
       return dateNodes
     } else {
       return dateTimeNodes
