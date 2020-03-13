@@ -1,8 +1,6 @@
 import Service from '@ember/service';
 import EmberObject from '@ember/object';
-import { task } from 'ember-concurrency';
-import { isArray } from '@ember/array';
-import { warn } from '@ember/debug';
+import { A } from '@ember/array';
 
 /**
  * Service responsible to check for RDFA date types and adding a hint to modify it when found.
@@ -17,23 +15,22 @@ import { warn } from '@ember/debug';
  *  If encountered, a hint is generated at the textual location of the content of that node.
  *  At hint insertion, the hinted node is replaced with update content.
  *
- *  POTENTIAL ISSUES/TODO
- *  ---------------------
- *  - Current implementation passes the domNode to replace to the card. At insetion of the update hint, this might be problematic
- *      as this dom node can be removed from the tree. (e.g. in case a silent DOM update occurs like setting a highlight)
- *
- *     TODO: Robust update of domNode
- *
- *
  * ---------------------------------------------------
  * END CODE REVIEW NOTES
  * ---------------------------------------------------
- * @module editor-date-overwrite-plugin
+ */
+
+const COMPONENT_ID = 'editor-plugins/date-overwrite-card';
+
+/**
+ * Service responsible for correct annotation of dates
+ *
+ * @module editor-data-overwrite-plugin
  * @class RdfaEditorDateOverwritePlugin
  * @constructor
  * @extends EmberService
  */
-const RdfaEditorDateOverwritePlugin = Service.extend({
+export default class RdfaEditorDateOverwritePlugin extends Service {
 
   /**
    * Restartable task to handle the incoming events from the editor dispatcher
@@ -41,39 +38,35 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
    * @method execute
    *
    * @param {string} hrId Unique identifier of the event in the hintsRegistry
-   * @param {Array} contexts RDFa contexts of the text snippets the event applies on
+   * @param {Array} rdfaBlocks RDFablocks of the text snippets the event applies on
    * @param {Object} hintsRegistry Registry of hints in the editor
    * @param {Object} editor The RDFa editor instance
    *
    * @public
    */
-  execute: task(function * (hrId, contexts, hintsRegistry, editor) {
-    const hints = [];
-    contexts
-      .filter(this.detectRelevantContext)
-      .forEach( (ctx) => {
-        hintsRegistry.removeHintsInRegion(ctx.region, hrId, this.get('who'));
-        hints.pushObjects(this.generateHintsForContext(editor,ctx));
-      });
-
-    const cards = hints.map( (hint) => this.generateCard(hrId, hintsRegistry, editor, hint));
-    if(cards.length > 0){
-      hintsRegistry.addHints(hrId, this.get('who'), cards);
+  execute(hrId, rdfaBlocks, hintsRegistry, editor) {
+    const hints = A();
+    for (let block of rdfaBlocks) {
+      if (this.isRelevant(block)) {
+        hints.push(this.generateHint(block, hrId, editor, hintsRegistry));
+      }
     }
-  }),
+    const spanningRegion = [ rdfaBlocks[0].start, rdfaBlocks.slice(-1).end ];
+    hintsRegistry.removeHintsInRegion(spanningRegion, hrId, COMPONENT_ID);
+    if (hints.length > 0) {
+      hintsRegistry.addHints(hrId, COMPONENT_ID, hints);
+    }
+  }
 
   /**
-   * Given context object, tries to detect a context the plugin can work on
+   * Given the rdfa block, determines whether it's relevent for the plugin to work on
    *
-   * @method detectRelevantContext
-   *
-   * @param {Object} context Text snippet at a specific location with an RDFa context
-   *
+   * @method isRelevant
+   * @param {RdfaBlock} block a specific rdfa block
    * @return {Boolean}
-   *
    * @private
    */
-  detectRelevantContext(context){
+  isRelevant(context){
     let lastTriple = context.context.slice(-1)[0];
     if(lastTriple.datatype == 'http://www.w3.org/2001/XMLSchema#date'){
       return true;
@@ -82,36 +75,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
       return true;
     }
     return false;
-  },
-
-  /**
-   * Generates a card given a hint
-   *
-   * @method generateCard
-   *
-   * @param {string} hrId Unique identifier of the event in the hintsRegistry
-   * @param {Object} hintsRegistry Registry of hints in the editor
-   * @param {Object} editor The RDFa editor instance
-   * @param {Object} hint containing the hinted string and the location of this string
-   *
-   * @return {Object} The card to hint for a given template
-   *
-   * @private
-   */
-  generateCard(hrId, hintsRegistry, editor, hint){
-    return EmberObject.create({
-      info: {
-        plainValue: hint.text,
-        value: hint.value,
-        datatype: hint.datatype,
-        location: hint.location,
-        hrId, hintsRegistry, editor
-      },
-      location: hint.location,
-      card: this.get('who'),
-      options: { noHighlight: true }
-    });
-  },
+  }
 
   /**
    * Generates a hint, given a context
@@ -124,22 +88,23 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
    *
    * @private
    */
-  generateHintsForContext(editor, context){
-    const triple = context.context.slice(-1)[0];
-    const hints = [];
+  generateHint(block, hrId, editor, hintsRegistry) {
+    const triple = block.context.slice(-1)[0];
     const value = triple.object;
     const content= triple.content;
     const datatype = triple.datatype;
-    const text = context.text || '';
-    const location = context.region;
-    hints.push({text, location, context, value, content, datatype});
-    return hints;
-  },
-
-
-});
-
-RdfaEditorDateOverwritePlugin.reopen({
-  who: 'editor-plugins/date-overwrite-card'
-});
-export default RdfaEditorDateOverwritePlugin;
+    const text = block.text || '';
+    return EmberObject.create({
+      info: {
+        plainValue: block.text || '',
+        value: triple.object,
+        datatype: triple.datatype,
+        location: block.region,
+        hrId, hintsRegistry, editor
+      },
+      location: block.region,
+      card: COMPONENT_ID,
+      options: { noHighlight: true }
+    });
+  }
+}
