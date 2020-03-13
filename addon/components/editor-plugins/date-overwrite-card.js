@@ -118,18 +118,18 @@ export default Component.extend({
     const newContent = {
       text: moment(newValue).format('LL'),
       content:  moment(newValue).format(this.rdfaDateFormat)
-    }
+    };
     return newContent;
   },
 
 
   firstMatchingDateNode(region){
-    const dateNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#date'})
-    const dateTimeNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#dateTime'})
+    const dateNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#date'});
+    const dateTimeNodes = this.editor.selectContext(region, { datatype: 'http://www.w3.org/2001/XMLSchema#dateTime'});
     if(dateNodes.selections.length) {
-      return dateNodes
+      return dateNodes;
     } else {
-      return dateTimeNodes
+      return dateTimeNodes;
     }
   },
 
@@ -138,8 +138,8 @@ export default Component.extend({
     const newContent = {
       text: this.formatTimeStr(dateTimeIso, hours),
       content: dateTimeIso
-    }
-    return newContent
+    };
+    return newContent;
   },
 
   actions: {
@@ -150,7 +150,6 @@ export default Component.extend({
         const nodeToUpdate = this.firstMatchingDateNode(mappedLocation);
         if (nodeToUpdate) {
           const domNodeToUpdate = nodeToUpdate;
-          console.log(domNodeToUpdate)
           var newContent;
           if (this.isDateTime) {
             newContent = this.createNewDatetimeContent(this.updatedDate, this.hours, this.minutes);
@@ -158,8 +157,7 @@ export default Component.extend({
           else {
             newContent = this.createNewDateContent(domNodeToUpdate, this.updatedDate);
           }
-          console.log(newContent)
-          this.editor.update(nodeToUpdate, {set: { innerHTML: newContent.text, content: newContent.content }})
+          this.editor.update(nodeToUpdate, {set: { innerHTML: newContent.text, content: newContent.content }});
         }
       }
     }
