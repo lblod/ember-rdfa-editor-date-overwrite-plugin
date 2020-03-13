@@ -136,23 +136,7 @@ const RdfaEditorDateOverwritePlugin = Service.extend({
     return hints;
   },
 
-  ascendDomNodesUntil(rootNode, domNode, condition){
-    if(!domNode || rootNode.isEqualNode(domNode)) return null;
-    if(!condition(domNode))
-      return this.ascendDomNodesUntil(rootNode, domNode.parentElement, condition);
-    return domNode;
-  },
 
-  findDomNodeForContext(editor, context, condition){
-    let richNodes = context.richNodes;
-    let domNode = richNodes
-          .map(r => this.ascendDomNodesUntil(editor.rootNode, r.domNode, condition))
-          .find(d => d);
-    if(!domNode){
-      warn(`Trying to work on unattached domNode. Sorry can't handle these...`, {id: 'date-overwrite-plugin.domNode'});
-    }
-    return domNode;
-  }
 });
 
 RdfaEditorDateOverwritePlugin.reopen({
