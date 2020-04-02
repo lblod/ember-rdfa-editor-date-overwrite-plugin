@@ -46,13 +46,12 @@ export default class RdfaEditorDateOverwritePlugin extends Service {
    */
   execute(hrId, rdfaBlocks, hintsRegistry, editor) {
     const hints = A();
+    hintsRegistry.removeHints( { rdfaBlocks, hrId, scope: COMPONENT_ID } );
     for (let block of rdfaBlocks) {
       if (this.isRelevant(block)) {
         hints.push(this.generateHint(block, hrId, editor, hintsRegistry));
       }
     }
-    const spanningRegion = [ rdfaBlocks[0].start, rdfaBlocks.slice(-1).end ];
-    hintsRegistry.removeHintsInRegion(spanningRegion, hrId, COMPONENT_ID);
     if (hints.length > 0) {
       hintsRegistry.addHints(hrId, COMPONENT_ID, hints);
     }
@@ -66,8 +65,8 @@ export default class RdfaEditorDateOverwritePlugin extends Service {
    * @return {Boolean}
    * @private
    */
-  isRelevant(context){
-    let lastTriple = context.context.slice(-1)[0];
+  isRelevant(block){
+    let lastTriple = block.context.slice(-1)[0];
     if(lastTriple.datatype == 'http://www.w3.org/2001/XMLSchema#date'){
       return true;
     }
