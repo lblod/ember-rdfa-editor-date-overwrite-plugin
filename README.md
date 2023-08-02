@@ -1,5 +1,6 @@
 @lblod/ember-rdfa-editor-date-overwrite-plugin
 ==============================================================================
+:warning: This ember addon is no longer maintained. Please use [@lblod/ember-rdfa-editor-lblod-plugins](https://github.com/lblod/ember-rdfa-editor-lblod-plugins) instead.
 
 Easy update of xsd:date or xsd:dateTime in an editor-document.
 
